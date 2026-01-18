@@ -1,0 +1,49 @@
+@startuml
+title Disparo exitoso de transición (representativo)
+
+participant Worker
+boundary "MonitorInterface" as MI
+control Monitor
+control NetState
+entity PetriNet
+entity Marking
+control "Policy" as Policy
+
+Worker -> MI : fireTransition(t)
+MI -> Monitor : fireTransition(t)
+activate Monitor
+
+Monitor -> Monitor : lock()
+
+' (opcional si hay transiciones temporales)
+Monitor -> NetState : timeLeft(t)
+NetState --> Monitor : msLeft
+
+Monitor -> NetState : isEnabled(t)
+activate NetState
+NetState -> PetriNet : isEnabledByTokens(marking,t)
+PetriNet --> NetState : true
+NetState --> Monitor : enabled
+deactivate NetState
+
+Monitor -> NetState : fire(t)
+activate NetState
+NetState -> PetriNet : fire(marking,t)
+PetriNet --> NetState : newMarking
+NetState -> Marking : (update reference)
+NetState --> Monitor : ok
+deactivate NetState
+
+Monitor -> Monitor : update counters / sequence
+
+Monitor -> Monitor : computeReadyToWake()
+Monitor -> Policy : choose(readyTransitions)
+Policy --> Monitor : chosen
+
+Monitor -> Monitor : signal(chosen)
+
+Monitor -> Monitor : unlock()
+deactivate Monitor
+
+Monitor --> Worker : true
+@enduml
