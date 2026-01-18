@@ -15,6 +15,9 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
+        long startMs = System.currentTimeMillis();
+        Log logger = new Log();
+
         // ===== 1) Configuración de corrida (TP pide 20–40s) =====
         long runMs = 20_000; // 30s (dentro del rango pedido)
 
@@ -47,9 +50,9 @@ public class Main {
         // ===== 6) Lanzar virtual threads =====
         List<Thread> threads = new ArrayList<>();
         threads.add(Thread.ofVirtual().name("A-Entrada").start(wA));
-        threads.add(Thread.ofVirtual().name("B-Superior").start(wB));
-        threads.add(Thread.ofVirtual().name("C-Media").start(wC));
-        threads.add(Thread.ofVirtual().name("D-Inferior").start(wD));
+        threads.add(Thread.ofVirtual().name("B-Procesamiento-Medio").start(wB));
+        threads.add(Thread.ofVirtual().name("C-Procesamiento-Rapido").start(wC));
+        threads.add(Thread.ofVirtual().name("D-Procesamiento-Lento").start(wD));
         threads.add(Thread.ofVirtual().name("E-Salida").start(wE));
 
         // ===== 7) Correr y detener limpio =====
@@ -87,6 +90,10 @@ public class Main {
         System.out.println("\nStopFeeding activado (T0>=limit): " + (fired[0] >= 200));
         System.out.println("Drain completado (T11>=limit): " + (fired[11] >= 200));
         System.out.println("Duración: " + runMs + " ms");
+        
+        long endMs = System.currentTimeMillis();
+        logger.writeSequence(monitor.getSequence());
+        logger.writeSummary(runMs, startMs, endMs, delays, policy, monitor, state);
 
     }
 }

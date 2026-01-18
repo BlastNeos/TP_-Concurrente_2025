@@ -66,8 +66,9 @@ public final class Log {
         ensureDir();
 
         int[] fired = monitor.getFiredCountSnapshot();
-        int[] picks = monitor.getPolicyPickCountSnapshot();
-        int[] marking = state.getMarkingSnapshot();
+    int[] picks = monitor.getPolicyPickCountSnapshot();
+    // NetState expone el Marking (inmutable). Pedimos una copia del arreglo mediante snapshot().
+    int[] marking = state.getMarking().snapshot();
 
         long totalConflictFires = fired[2] + fired[5] + fired[7];
 
