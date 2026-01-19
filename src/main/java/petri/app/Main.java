@@ -19,7 +19,7 @@ public class Main {
         Log logger = new Log();
 
         // ===== 1) Configuración de corrida (TP pide 20–40s) =====
-        long runMs = 20_000; // 30s (dentro del rango pedido)
+        long runMs = 30_000; // 30s (dentro del rango pedido)
 
         // ===== 2) Delays aleatorios para transiciones temporales =====
         long[] delays = Tp2025Net.randomDelaysForTimed(1, 5);
@@ -59,7 +59,8 @@ public class Main {
         Thread.sleep(runMs);
         monitor.requestStop();
 
-        for (Thread t : threads) t.join();
+        for (Thread t : threads) 
+            t.join();
 
         // ===== 8) Resumen =====
         int[] fired = monitor.getFiredCountSnapshot();

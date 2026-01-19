@@ -14,15 +14,13 @@ import java.util.Arrays;
 public final class Log {
 
     private final Path dir;
-    private final String runId;
 
     public Log() {
         this.dir = Paths.get("logs");
-        this.runId = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
     }
 
     private Path file(String name) {
-        return dir.resolve(runId + "-" + name);
+        return dir.resolve(name);
     }
 
     private void ensureDir() {
@@ -74,7 +72,7 @@ public final class Log {
 
         StringBuilder sb = new StringBuilder(2048);
         sb.append("=== FIN SIMULACIÓN ===\n");
-        sb.append("RunId: ").append(runId).append("\n");
+        //sb.append("RunId: ").append(runId).append("\n");
         sb.append("Duración configurada (runMs): ").append(runMs).append(" ms\n");
         sb.append("Tiempo real: ").append(endMs - startMs).append(" ms\n");
         sb.append("Policy: ").append(policy.getClass().getSimpleName()).append("\n");
