@@ -2,10 +2,7 @@ package petri.app;
 
 import petri.core.Marking;
 import petri.core.PetriNet;
-import petri.monitor.Monitor;
-import petri.monitor.MonitorInterface;
-import petri.monitor.Policy;
-import petri.monitor.RandomPolicy;
+import petri.monitor.*;
 import petri.runtime.NetState;
 
 import java.util.ArrayList;
@@ -30,7 +27,7 @@ public class Main {
         NetState state = new NetState(net, initial);
 
         // ===== 4) Monitor + política =====
-        Policy policy = new RandomPolicy(); // luego metemos PriorityPolicy
+        Policy policy = new PriorityPolicy(); // luego metemos PriorityPolicy
         Monitor monitor = new Monitor(state, policy, net.transitions());
         MonitorInterface mon = monitor; // por si Worker usa la interfaz
 
