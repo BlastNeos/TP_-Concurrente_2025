@@ -120,7 +120,7 @@ public class Monitor implements MonitorInterface {
 
                 // Fase de drenaje: T0 está prohibida
                 if (t == feedTransition && stopFeeding) {
-                    // Backoff pequeño: evita busy loop del worker de entrada
+                    // Backoff pequeño  : evita busy loop del worker de entrada
                     waiting[t]++;
                     try {
                         cond[t].await(5, TimeUnit.MILLISECONDS);

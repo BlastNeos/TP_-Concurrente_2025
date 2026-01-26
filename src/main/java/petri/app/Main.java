@@ -2,10 +2,7 @@ package petri.app;
 
 import petri.core.Marking;
 import petri.core.PetriNet;
-import petri.monitor.Monitor;
-import petri.monitor.MonitorInterface;
-import petri.monitor.Policy;
-import petri.monitor.RandomPolicy;
+import petri.monitor.*;
 import petri.runtime.NetState;
 
 import java.util.ArrayList;
@@ -15,8 +12,11 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
+        long startMs = System.currentTimeMillis();
+        Log logger = new Log();
+
         // ===== 1) Configuración de corrida (TP pide 20–40s) =====
-        long runMs = 20_000; // 30s (dentro del rango pedido)
+        long runMs = 30_000; // 30s (dentro del rango pedido)
 
         // ===== 2) Delays aleatorios para transiciones temporales =====
         long[] delays = Tp2025Net.randomDelaysForTimed(1, 5);
@@ -27,7 +27,7 @@ public class Main {
         NetState state = new NetState(net, initial);
 
         // ===== 4) Monitor + política =====
-        Policy policy = new RandomPolicy(); // luego metemos PriorityPolicy
+        Policy policy = new PriorityPolicy(); // luego metemos PriorityPolicy
         Monitor monitor = new Monitor(state, policy, net.transitions());
         MonitorInterface mon = monitor; // por si Worker usa la interfaz
 
@@ -47,16 +47,17 @@ public class Main {
         // ===== 6) Lanzar virtual threads =====
         List<Thread> threads = new ArrayList<>();
         threads.add(Thread.ofVirtual().name("A-Entrada").start(wA));
-        threads.add(Thread.ofVirtual().name("B-Superior").start(wB));
-        threads.add(Thread.ofVirtual().name("C-Media").start(wC));
-        threads.add(Thread.ofVirtual().name("D-Inferior").start(wD));
+        threads.add(Thread.ofVirtual().name("B-Procesamiento-Medio").start(wB));
+        threads.add(Thread.ofVirtual().name("C-Procesamiento-Rapido").start(wC));
+        threads.add(Thread.ofVirtual().name("D-Procesamiento-Lento").start(wD));
         threads.add(Thread.ofVirtual().name("E-Salida").start(wE));
 
         // ===== 7) Correr y detener limpio =====
         Thread.sleep(runMs);
         monitor.requestStop();
 
-        for (Thread t : threads) t.join();
+        for (Thread t : threads) 
+            t.join();
 
         // ===== 8) Resumen =====
         int[] fired = monitor.getFiredCountSnapshot();
@@ -87,6 +88,10 @@ public class Main {
         System.out.println("\nStopFeeding activado (T0>=limit): " + (fired[0] >= 200));
         System.out.println("Drain completado (T11>=limit): " + (fired[11] >= 200));
         System.out.println("Duración: " + runMs + " ms");
+        
+        long endMs = System.currentTimeMillis();
+        logger.writeSequence(monitor.getSequence());
+        logger.writeSummary(runMs, startMs, endMs, delays, policy, monitor, state);
 
     }
 }

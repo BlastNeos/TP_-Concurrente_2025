@@ -36,6 +36,10 @@ public class NetState {
         return marking; // devuelve el estado actual (inmutable)
     }
 
+    public int[] getMarkingSnapshot() {
+        return marking.snapshot(); // asume que Marking tiene snapshot() que devuelve int[]
+    }
+
     /**
      * Devuelve:
      *  -1  si NO está habilitada por tokens
