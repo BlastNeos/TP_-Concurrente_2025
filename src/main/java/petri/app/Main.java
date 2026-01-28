@@ -5,6 +5,8 @@ import petri.core.PetriNet;
 import petri.monitor.Monitor;
 import petri.monitor.MonitorInterface;
 import petri.monitor.Policy;
+import petri.monitor.PriorityPolicy;
+import java.util.Set;
 import petri.monitor.RandomPolicy;
 import petri.runtime.NetState;
 
@@ -30,7 +32,8 @@ public class Main {
         NetState state = new NetState(net, initial);
 
         // ===== 4) Monitor + política =====
-        Policy policy = new RandomPolicy(); // luego metemos PriorityPolicy
+        //Policy policy = new RandomPolicy();
+        Policy policy = new PriorityPolicy(Set.of(5)); // PriorityPolicy(Set.of(int));
         Monitor monitor = new Monitor(state, policy, net.transitions());
         MonitorInterface mon = monitor; // por si Worker usa la interfaz
 
