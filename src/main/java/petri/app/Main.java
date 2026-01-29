@@ -2,7 +2,12 @@ package petri.app;
 
 import petri.core.Marking;
 import petri.core.PetriNet;
-import petri.monitor.*;
+import petri.monitor.Monitor;
+import petri.monitor.MonitorInterface;
+import petri.monitor.Policy;
+import petri.monitor.PriorityPolicy;
+import java.util.Set;
+import petri.monitor.RandomPolicy;
 import petri.runtime.NetState;
 
 import java.util.ArrayList;
