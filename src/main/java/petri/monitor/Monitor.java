@@ -60,7 +60,7 @@ public class Monitor implements MonitorInterface {
 
         this.limit = 200;                 // <<< tu tope
         this.startMs = System.currentTimeMillis();
-        this.maxRunMs = 20_000;           // seguridad: 40s (ajustable)
+        this.maxRunMs = 45_000;           // seguridad: 40s (ajustable)
 
         for (int i = 0; i < transitions; i++) {
             cond[i] = lock.newCondition();
@@ -120,7 +120,7 @@ public class Monitor implements MonitorInterface {
 
                 // Fase de drenaje: T0 está prohibida
                 if (t == feedTransition && stopFeeding) {
-                    // Backoff pequeño: evita busy loop del worker de entrada
+                    // Backoff pequeño  : evita busy loop del worker de entrada
                     waiting[t]++;
                     try {
                         cond[t].await(5, TimeUnit.MILLISECONDS);

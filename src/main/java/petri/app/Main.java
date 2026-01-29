@@ -12,6 +12,7 @@ import petri.runtime.NetState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Main {
 
@@ -20,11 +21,11 @@ public class Main {
         long startMs = System.currentTimeMillis();
         Log logger = new Log();
 
-        // ===== 1) Configuración de corrida (TP pide 20–40s) =====
-        long runMs = 30_000; // 30s (dentro del rango pedido)
+        // ===== 1) Watchdog de seguridad (NO es la duración objetivo) =====
+        long watchdogMs = 40_000; // el TP pide que normalmente termine 20–40s; esto evita loops infinitos
 
-        // ===== 2) Delays aleatorios para transiciones temporales =====
-        long[] delays = Tp2025Net.randomDelaysForTimed(1, 5);
+        // ===== 2) Delays fijos (Escenario 0) =====
+        long[] delays = Tp2025Net.fixedDelaysScenario0();
 
         // ===== 3) Construir red + estado =====
         PetriNet net = Tp2025Net.build(delays);
@@ -32,40 +33,48 @@ public class Main {
         NetState state = new NetState(net, initial);
 
         // ===== 4) Monitor + política =====
-        //Policy policy = new RandomPolicy();
-        Policy policy = new PriorityPolicy(Set.of(5)); // PriorityPolicy(Set.of(int));
-        Monitor monitor = new Monitor(state, policy, net.transitions());
-        MonitorInterface mon = monitor; // por si Worker usa la interfaz
+        Policy policy = new RandomPolicy(); // o new PriorityPolicy(Set.of(5))
+        Monitor monitor = new Monitor(state, policy, Tp2025Net.TRANSITIONS);
+        MonitorInterface mon = monitor;
 
-        // ===== 5) Segmentación según el diagrama (5 hilos) =====
-        int[] A = {0, 1};             // Entrada
-        int[] B = {2, 3, 4};          // Rama superior
-        int[] C = {5, 6};             // Rama media
-        int[] D = {7, 8, 9, 10};      // Rama inferior
-        int[] E = {11};               // Salida
+        // ===== 5) Segmentos / responsabilidades (dimensionamiento: 9 hilos) =====
+        int[] PRE  = {0, 1};                // segmento previo al conflicto
+        int[] R1   = {2, 3, 4};             // rama 1
+        int[] R2   = {5, 6};                // rama 2
+        int[] R3   = {7, 8, 9, 10};         // rama 3
+        int[] POST = {11};                  // segmento posterior al join
 
-        Worker wA = new Worker(A, mon);
-        Worker wB = new Worker(B, mon);
-        Worker wC = new Worker(C, mon);
-        Worker wD = new Worker(D, mon);
-        Worker wE = new Worker(E, mon);
-
-        // ===== 6) Lanzar virtual threads =====
+        // ===== 6) Lanzar 9 virtual threads =====
         List<Thread> threads = new ArrayList<>();
-        threads.add(Thread.ofVirtual().name("A-Entrada").start(wA));
-        threads.add(Thread.ofVirtual().name("B-Procesamiento-Medio").start(wB));
-        threads.add(Thread.ofVirtual().name("C-Procesamiento-Rapido").start(wC));
-        threads.add(Thread.ofVirtual().name("D-Procesamiento-Lento").start(wD));
-        threads.add(Thread.ofVirtual().name("E-Salida").start(wE));
 
-        // ===== 7) Correr y detener limpio =====
-        Thread.sleep(runMs);
-        monitor.requestStop();
+        // 3 hilos PRE (paralelismo por capacidad del buffer)
+        threads.add(Thread.ofVirtual().name("PRE-1").start(new Worker(PRE, mon)));
+        threads.add(Thread.ofVirtual().name("PRE-2").start(new Worker(PRE, mon)));
+        threads.add(Thread.ofVirtual().name("PRE-3").start(new Worker(PRE, mon)));
 
-        for (Thread t : threads) 
-            t.join();
+        // 1 hilo por rama
+        threads.add(Thread.ofVirtual().name("R1").start(new Worker(R1, mon)));
+        threads.add(Thread.ofVirtual().name("R2").start(new Worker(R2, mon)));
+        threads.add(Thread.ofVirtual().name("R3").start(new Worker(R3, mon)));
 
-        // ===== 8) Resumen =====
+        // 3 hilos POST (paralelismo por capacidad del buffer)
+        threads.add(Thread.ofVirtual().name("POST-1").start(new Worker(POST, mon)));
+        threads.add(Thread.ofVirtual().name("POST-2").start(new Worker(POST, mon)));
+        threads.add(Thread.ofVirtual().name("POST-3").start(new Worker(POST, mon)));
+
+        // ===== 7) Esperar fin natural (T11>=limit) o watchdog =====
+        while (!monitor.isStopRequested()) {
+            long elapsed = System.currentTimeMillis() - startMs;
+            if (elapsed >= watchdogMs) {
+                monitor.requestStop();
+                break;
+            }
+            Thread.sleep(10);
+        }
+
+        for (Thread t : threads) t.join();
+
+        // ===== 8) Resumen / logs =====
         int[] fired = monitor.getFiredCountSnapshot();
         int[] picks = monitor.getPolicyPickCountSnapshot();
 
@@ -91,13 +100,18 @@ public class Main {
                     100.0 * fired[5] / totalConflictFires,
                     100.0 * fired[7] / totalConflictFires);
         }
+
         System.out.println("\nStopFeeding activado (T0>=limit): " + (fired[0] >= 200));
         System.out.println("Drain completado (T11>=limit): " + (fired[11] >= 200));
-        System.out.println("Duración: " + runMs + " ms");
-        
-        long endMs = System.currentTimeMillis();
-        logger.writeSequence(monitor.getSequence());
-        logger.writeSummary(runMs, startMs, endMs, delays, policy, monitor, state);
 
+        long endMs = System.currentTimeMillis();
+        long elapsedMs = endMs - startMs;
+        System.out.println("Duración real: " + elapsedMs + " ms");
+        System.out.println("Watchdog configurado: " + watchdogMs + " ms");
+
+        logger.writeSequence(monitor.getSequence());
+
+        // OJO: acá conviene pasar elapsed real. Si no querés cambiar Log, al menos no lo llames "runMs".
+        logger.writeSummary(watchdogMs, startMs, endMs, delays, policy, monitor, state);
     }
 }

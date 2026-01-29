@@ -87,4 +87,16 @@ public final class Tp2025Net {
         }
         return d;
     }
+
+    public static long[] fixedDelaysScenario0() {
+        long[] d = new long[TRANSITIONS];
+        d[1]  = 250;   // T1
+        d[3]  = 50;   // T3
+        d[4]  = 50;   // T4
+        d[6]  = 50;   // T6
+        d[8]  = 50;   // T8
+        d[9]  = 50;   // T9
+        d[10] = 50;   // T10
+        return d;
+    }
 }
