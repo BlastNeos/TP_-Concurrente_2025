@@ -90,7 +90,7 @@ public final class Tp2025Net {
 
     public static long[] fixedDelaysScenario0() {
         long[] d = new long[TRANSITIONS];
-        d[1]  = 150;   // T1
+        d[1]  = 250;   // T1
         d[3]  = 50;   // T3
         d[4]  = 50;   // T4
         d[6]  = 50;   // T6
