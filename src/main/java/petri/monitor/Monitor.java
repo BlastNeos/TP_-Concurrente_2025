@@ -60,7 +60,7 @@ public class Monitor implements MonitorInterface {
 
         this.limit = 200;                 // <<< tu tope
         this.startMs = System.currentTimeMillis();
-        this.maxRunMs = 20_000;           // seguridad: 40s (ajustable)
+        this.maxRunMs = 45_000;           // seguridad: 40s (ajustable)
 
         for (int i = 0; i < transitions; i++) {
             cond[i] = lock.newCondition();
