@@ -1,22 +1,22 @@
 === FIN SIMULACIÓN ===
-Duración configurada (runMs): 50000 ms
-Tiempo real: 50193 ms
+Duración configurada (runMs): 40000 ms
+Tiempo real: 30392 ms
 Policy: RandomPolicy
-Delays temporales (ms) por transición: [0, 4, 0, 1, 2, 0, 3, 0, 4, 1, 5, 0]
+Delays temporales (ms) por transición: [0, 150, 0, 50, 50, 0, 50, 0, 50, 50, 50, 0]
 Marking final: [3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]
 
 === MÉTRICAS DE DISPARO ===
 T0 disparos: 200
 T1 disparos: 200
-T2 disparos: 94
-T3 disparos: 94
-T4 disparos: 94
-T5 disparos: 45
-T6 disparos: 45
-T7 disparos: 61
-T8 disparos: 61
-T9 disparos: 61
-T10 disparos: 61
+T2 disparos: 61
+T3 disparos: 61
+T4 disparos: 61
+T5 disparos: 52
+T6 disparos: 52
+T7 disparos: 87
+T8 disparos: 87
+T9 disparos: 87
+T10 disparos: 87
 T11 disparos: 200
 
 === CICLOS / INVARIANTES ===
@@ -24,11 +24,11 @@ Ciclos inyectados (T0): 200
 Ciclos completados (T11): 200
 
 === CONFLICTO (DISPAROS REALES) ===
-T2: 94 | T5: 45 | T7: 61
+T2: 61 | T5: 52 | T7: 87
 
 === CONFLICTO (DECISIONES DE POLÍTICA) ===
-Pick T2: 60 | Pick T5: 43 | Pick T7: 68
-Distribución real: T2=47,0%, T5=22,5%, T7=30,5%
+Pick T2: 83 | Pick T5: 72 | Pick T7: 52
+Distribución real: T2=30,5%, T5=26,0%, T7=43,5%
 
 StopFeeding activado (T0>=limit): true
 Drain completado (T11>=limit): true
