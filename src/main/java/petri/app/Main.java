@@ -12,7 +12,6 @@ import petri.runtime.NetState;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class Main {
 
@@ -33,7 +32,8 @@ public class Main {
         NetState state = new NetState(net, initial);
 
         // ===== 4) Monitor + política =====
-        Policy policy = new RandomPolicy(); // o new PriorityPolicy(Set.of(5))
+        Policy policy = new RandomPolicy(); 
+        //Policy policy = new PriorityPolicy(Set.of(5));
         Monitor monitor = new Monitor(state, policy, Tp2025Net.TRANSITIONS);
         MonitorInterface mon = monitor;
 
@@ -76,22 +76,22 @@ public class Main {
 
         // ===== 8) Resumen / logs =====
         int[] fired = monitor.getFiredCountSnapshot();
-        int[] picks = monitor.getPolicyPickCountSnapshot();
+        //int[] picks = monitor.getPolicyPickCountSnapshot();
 
         System.out.println("\n=== MÉTRICAS DE DISPARO ===");
         for (int i = 0; i < fired.length; i++) {
             System.out.printf("T%d disparos: %d%n", i, fired[i]);
         }
 
-        System.out.println("\n=== CICLOS / INVARIANTES ===");
-        System.out.println("Ciclos inyectados (T0):  " + fired[0]);
-        System.out.println("Ciclos completados (T11): " + fired[11]);
+        // System.out.println("\n=== CICLOS / INVARIANTES ===");
+        // System.out.println("Ciclos inyectados (T0):  " + fired[0]);
+        // System.out.println("Ciclos completados (T11): " + fired[11]);
 
-        System.out.println("\n=== CONFLICTO (DISPAROS REALES) ===");
+        System.out.println("\n=== SELECCION DE CONFLICTO ===");
         System.out.println("T2: " + fired[2] + " | T5: " + fired[5] + " | T7: " + fired[7]);
 
-        System.out.println("\n=== CONFLICTO (DECISIONES DE POLÍTICA) ===");
-        System.out.println("Pick T2: " + picks[2] + " | Pick T5: " + picks[5] + " | Pick T7: " + picks[7]);
+        // System.out.println("\n=== CONFLICTO (DECISIONES DE POLÍTICA) ===");
+        // System.out.println("Pick T2: " + picks[2] + " | Pick T5: " + picks[5] + " | Pick T7: " + picks[7]);
 
         long totalConflictFires = fired[2] + fired[5] + fired[7];
         if (totalConflictFires > 0) {
